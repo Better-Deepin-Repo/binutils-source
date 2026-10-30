@@ -384,12 +384,14 @@ static symbolS *
 i386_intel_simplify_symbol (symbolS *sym)
 {
   if (symbol_resolving_p (sym))
-    return sym;
+    return NULL;
 
   symbolS *orig = sym;
   offsetT off;
   sym = symbol_equated_to (sym, &off);
-  if (sym == NULL || off != 0)
+  if (sym == NULL)
+    return NULL;
+  if (off != 0)
     return orig;
 
   segT seg = S_GET_SEGMENT (sym);
@@ -546,33 +548,31 @@ i386_intel_simplify (expressionS *e)
 	  segT leftseg = NULL, rightseg = NULL;
 
 	  newsym = i386_intel_simplify_symbol (e->X_add_symbol);
-	  if (newsym)
-	    {
-	      e->X_add_symbol = newsym;
+	  if (!newsym)
+	    return 0;
+	  e->X_add_symbol = newsym;
 
-	      if (base != intel_state.base || state_index != intel_state.index)
-		{
-		  base = intel_state.base;
-		  state_index = intel_state.index;
-		  left = symbol_get_value_expression (newsym);
-		  resolve_expression (left);
-		  leftseg = S_GET_SEGMENT (newsym);
-		}
+	  if (base != intel_state.base || state_index != intel_state.index)
+	    {
+	      base = intel_state.base;
+	      state_index = intel_state.index;
+	      left = symbol_get_value_expression (newsym);
+	      resolve_expression (left);
+	      leftseg = S_GET_SEGMENT (newsym);
 	    }
 
 	  newsym = i386_intel_simplify_symbol (e->X_op_symbol);
-	  if (newsym)
-	    {
-	      e->X_op_symbol = newsym;
+	  if (!newsym)
+	    return 0;
+	  e->X_op_symbol = newsym;
 
-	      if (base != intel_state.base || state_index != intel_state.index)
-		{
-		  base = intel_state.base;
-		  state_index = intel_state.index;
-		  right = symbol_get_value_expression (newsym);
-		  resolve_expression (right);
-		  rightseg = S_GET_SEGMENT (newsym);
-		}
+	  if (base != intel_state.base || state_index != intel_state.index)
+	    {
+	      base = intel_state.base;
+	      state_index = intel_state.index;
+	      right = symbol_get_value_expression (newsym);
+	      resolve_expression (right);
+	      rightseg = S_GET_SEGMENT (newsym);
 	    }
 
 	  if (left && right
@@ -912,9 +912,11 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  i.types[this_operand].bitfield.tbyte = 1;
 	  if (got_a_float)
 	    break;
+	  const i386_operand_type *t_types
+	    = get_operand_types (current_templates.start);
 	  if (flag_code == CODE_64BIT
-	      && (current_templates.start->operand_types[0].bitfield.fword
-		  || current_templates.start->operand_types[0].bitfield.tbyte
+	      && (t_types[0].bitfield.fword
+		  || t_types[0].bitfield.tbyte
 		  || current_templates.start->opcode_modifier.jump == JUMP_DWORD
 		  || current_templates.start->opcode_modifier.jump == JUMP))
 	    suffix = QWORD_MNEM_SUFFIX; /* l[fgs]s, [ls][gi]dt, call, jmp */
@@ -1020,10 +1022,11 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	      if (!t->opcode_modifier.modrm)
 		break;
 
-	      if (!t->operand_types[op].bitfield.baseindex)
+	      const i386_operand_type *t_types = get_operand_types (t);
+	      if (!t_types[op].bitfield.baseindex)
 		continue;
 
-	      switch (t->operand_types[op].bitfield.class)
+	      switch (t_types[op].bitfield.class)
 		{
 		case RegMMX:
 		case RegSIMD:

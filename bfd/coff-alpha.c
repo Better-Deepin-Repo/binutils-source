@@ -496,6 +496,7 @@ alpha_ecoff_swap_reloc_in (bfd *abfd,
 {
   const RELOC *ext = ext_ptr;
 
+  memset (intern, 0, sizeof (*intern));
   intern->r_vaddr = H_GET_64 (abfd, ext->r_vaddr);
   intern->r_symndx = H_GET_32 (abfd, ext->r_symndx);
 
@@ -770,12 +771,13 @@ write_bit_field (bfd *abfd, asection *sec,
    assembler is going to handle this.  */
 
 static bfd_byte *
-alpha_ecoff_get_relocated_section_contents (bfd *abfd,
-					    struct bfd_link_info *link_info,
-					    struct bfd_link_order *link_order,
-					    bfd_byte *data,
-					    bool relocatable,
-					    asymbol **symbols)
+alpha_ecoff_get_relocated_section_contents
+  (bfd *abfd,
+   struct bfd_link_info *link_info,
+   const struct bfd_link_order *link_order,
+   bfd_byte *data,
+   bool relocatable,
+   asymbol **symbols)
 {
   bfd *input_bfd = link_order->u.indirect.section->owner;
   asection *input_section = link_order->u.indirect.section;

@@ -22,6 +22,7 @@
 #include "sysdep.h"
 #include "disassemble.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 #include "opintl.h"
 #include "opcode/bpf.h"
 #include "elf-bfd.h"
@@ -208,6 +209,12 @@ print_insn_bpf (bfd_vma pc, disassemble_info *info)
                   (*info->fprintf_styled_func) (info->stream, dis_style_text, "%%");
                   p += 2;
                 }
+              else if (*(p + 1) == 't')
+                {
+                  /* %t marks the end of a mnemonic and prints to nothing;
+                     the %w or %W that follows prints the space.  */
+                  p += 2;
+                }
               else if (*(p + 1) == 'w' || *(p + 1) == 'W')
                 {
                   /* %W prints to a single space.  */
@@ -283,6 +290,19 @@ print_insn_bpf (bfd_vma pc, disassemble_info *info)
                                                 bpf_extract_imm64 (word, word2, endian));
                   insn_size = 16;
                   p += 4;
+                }
+              else if (ISDIGIT (*(p + 1)))
+                {
+                  /* %DIGIT is a constant the opcode itself encodes; print
+                     the number without its tag.  */
+                  p += 1;
+                  while (ISDIGIT (*p))
+                    {
+                      (*info->fprintf_styled_func) (info->stream,
+                                                    dis_style_immediate,
+                                                    "%c", *p);
+                      p += 1;
+                    }
                 }
               else
                 {

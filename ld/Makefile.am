@@ -299,7 +299,6 @@ ALL_EMULATION_SOURCES = \
 	ehppanbsd.c \
 	ehppaobsd.c \
 	ei386aout.c \
-	ei386beos.c \
 	ei386bsd.c \
 	ei386go32.c \
 	ei386lynx.c \
@@ -798,7 +797,7 @@ install-data-local: install-bfdpluginLTLIBRARIES
 	$(mkinstalldirs) $(DESTDIR)$(scriptdir)/ldscripts
 	for f in ldscripts/* ; do \
 	  case $$f in \
-	    stamp) ;; \
+	    */stamp) ;; \
 	    *) $(INSTALL_DATA) $$f $(DESTDIR)$(scriptdir)/$$f ; \
 	  esac \
 	done

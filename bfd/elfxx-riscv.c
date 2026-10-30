@@ -961,6 +961,64 @@ static const reloc_howto_type howto_table_internal[] =
 	 0,				/* src_mask */
 	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
 	 false),			/* pcrel_offset */
+
+  /* R_RISCV_TABLE_JUMP.  */
+  EMPTY_HOWTO (0),
+
+  /* TLSDESC relaxed to Initial Exec.  */
+  HOWTO (R_RISCV_TLSDESC_IE_HI,		/* type */
+	 0,				/* rightshift */
+	 4,				/* size */
+	 32,				/* bitsize */
+	 true,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_TLSDESC_IE_HI",	/* name */
+	 false,				/* partial_inplace */
+	 0,				/* src_mask */
+	 ENCODE_UTYPE_IMM (-1U),	/* dst_mask */
+	 false),			/* pcrel_offset */
+  HOWTO (R_RISCV_TLSDESC_IE_LO,		/* type */
+	 0,				/* rightshift */
+	 4,				/* size */
+	 32,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_TLSDESC_IE_LO",	/* name */
+	 false,				/* partial_inplace */
+	 0,				/* src_mask */
+	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
+	 false),			/* pcrel_offset */
+  /* TLSDESC relaxed to Local Exec.  */
+  HOWTO (R_RISCV_TLSDESC_LE_HI,		/* type */
+	 0,				/* rightshift */
+	 4,				/* size */
+	 32,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_TLSDESC_LE_HI",	/* name */
+	 false,				/* partial_inplace */
+	 0,				/* src_mask */
+	 ENCODE_UTYPE_IMM (-1U),	/* dst_mask */
+	 false),			/* pcrel_offset */
+  HOWTO (R_RISCV_TLSDESC_LE_LO,		/* type */
+	 0,				/* rightshift */
+	 4,				/* size */
+	 32,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_TLSDESC_LE_LO",	/* name */
+	 false,				/* partial_inplace */
+	 0,				/* src_mask */
+	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
+	 false),			/* pcrel_offset */
 };
 
 /* A mapping from BFD reloc types to RISC-V ELF reloc types.  */
@@ -1230,29 +1288,52 @@ static const struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"xtheadvector", "+zicsr", check_implicit_always},
   {"xtheadzvamo", "+zaamo", check_implicit_always},
 
-  {"xsmtvdot", "+zve32x", check_implicit_always},
+  {"xxtvarith", "+v",	check_implicit_always},
+  {"xxtvcoder", "+v",	check_implicit_always},
+
   {"xsmtvdotii", "+xsmtvdot", check_implicit_always},
+  {"xsmtvdot", "+zve32x", check_implicit_always},
 
   {"v", "+zve64d,+zvl128b", check_implicit_always},
   {"zvabd", "+zve32x", check_implicit_always},
   {"zvfh", "+zvfhmin,+zfhmin", check_implicit_always},
   {"zvfhmin", "+zve32f", check_implicit_always},
-  {"zvfbfwma", "+zve32f,+zfbfmin", check_implicit_always},
+  {"zvfbfwma", "+zfbfmin,+zvfbfmin", check_implicit_always},
   {"zvfbfmin", "+zve32f", check_implicit_always},
   {"zvfbdota32f", "+zve32f", check_implicit_always},
   {"zvfqwbdota8f", "+zve32f", check_implicit_always},
   {"zvfqwdota8f", "+zve32f", check_implicit_always},
   {"zvfwbdota16bf", "+zve32f", check_implicit_always},
   {"zvfwdota16bf", "+zve32f", check_implicit_always},
+
+  {"zvbb", "+zvkb", check_implicit_always},
+  {"zvkng", "+zvkn,+zvkg", check_implicit_always},
+  {"zvknc", "+zvkn,+zvbc", check_implicit_always},
+  {"zvkn", "+zvkned,+zvknhb,+zvkb,+zvkt", check_implicit_always},
+  {"zvksg", "+zvks,+zvkg", check_implicit_always},
+  {"zvksc", "+zvks,+zvbc", check_implicit_always},
+  {"zvks", "+zvksed,+zvksh,+zvkb,+zvkt", check_implicit_always},
+
+  {"zvbc", "+zve32x", check_implicit_always},
+  {"zvkb", "+zve32x", check_implicit_always},
+  {"zvkg", "+zve32x", check_implicit_always},
+  {"zvkned", "+zve32x", check_implicit_always},
+  {"zvknha", "+zve32x", check_implicit_always},
+  {"zvknhb", "+zve32x", check_implicit_always},
+  {"zvksed", "+zve32x", check_implicit_always},
+  {"zvksh", "+zve32x", check_implicit_always},
+
   {"zvqwbdota8i", "+zve32x", check_implicit_always},
   {"zvqwbdota16i", "+zve64x", check_implicit_always},
   {"zvqwdota8i", "+zve32x", check_implicit_always},
   {"zvqwdota16i", "+zve64x", check_implicit_always},
+
   {"zve64d", "+d,+zve64f", check_implicit_always},
-  {"zve64f", "+zve32f,+zve64x,+zvl64b", check_implicit_always},
-  {"zve32f", "+f,+zve32x,+zvl32b", check_implicit_always},
+  {"zve64f", "+zve32f,+zve64x", check_implicit_always},
+  {"zve32f", "+f,+zve32x", check_implicit_always},
   {"zve64x", "+zve32x,+zvl64b", check_implicit_always},
   {"zve32x", "+zvl32b,+zicsr", check_implicit_always},
+
   {"zvl65536b", "+zvl32768b", check_implicit_always},
   {"zvl32768b", "+zvl16384b", check_implicit_always},
   {"zvl16384b", "+zvl8192b", check_implicit_always},
@@ -1312,18 +1393,12 @@ static const struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zk", "+zkn,+zkr,+zkt", check_implicit_always},
   {"zkn", "+zbkb,+zbkc,+zbkx,+zkne,+zknd,+zknh", check_implicit_always},
   {"zks", "+zbkb,+zbkc,+zbkx,+zksed,+zksh", check_implicit_always},
-  {"zvbb", "+zvkb", check_implicit_always},
-  {"zvkng", "+zvkn,+zvkg", check_implicit_always},
-  {"zvknc", "+zvkn,+zvbc", check_implicit_always},
-  {"zvkn", "+zvkned,+zvknhb,+zvkb,+zvkt", check_implicit_always},
-  {"zvksg", "+zvks,+zvkg", check_implicit_always},
-  {"zvksc", "+zvks,+zvbc", check_implicit_always},
-  {"zvks", "+zvksed,+zvksh,+zvkb,+zvkt", check_implicit_always},
 
   {"sdtrig", "+zicsr", check_implicit_always},
 
   {"smaia", "+ssaia", check_implicit_always},
   {"smcdeleg", "+ssccfg", check_implicit_always},
+  {"smpmpdeleg", "+smcsrind,+sspmp", check_implicit_always},
   {"smcsrind", "+sscsrind", check_implicit_always},
   {"smcntrpmf", "+zicsr", check_implicit_always},
   {"smctr", "+zicsr", check_implicit_always},
@@ -1336,6 +1411,8 @@ static const struct riscv_implicit_subset riscv_implicit_subsets[] =
 
   {"ssaia", "+zicsr", check_implicit_always},
   {"ssccfg", "+sscsrind", check_implicit_always},
+  {"sspmpen", "+sspmp", check_implicit_always},
+  {"sspmp", "+sscsrind", check_implicit_always},
   {"sscsrind", "+zicsr", check_implicit_always},
   {"sscofpmf", "+zicsr", check_implicit_always},
   {"sscounterenw", "+zicsr", check_implicit_always},
@@ -1467,6 +1544,7 @@ static const struct riscv_supported_ext riscv_supported_std_z_ext[] =
 {
   {"zic64b",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ziccamoa",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"ziccamoc",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ziccif",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"zicclsm",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ziccrse",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
@@ -1494,6 +1572,7 @@ static const struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zacas",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"zalasr",           ISA_SPEC_CLASS_DRAFT,           1, 0,  0 },
   {"zalrsc",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"zama16b",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"zawrs",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"zfbfmin",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"zfa",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
@@ -1526,7 +1605,7 @@ static const struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zve64x",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"zve64f",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"zve64d",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
-  {"zvabd",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"zvabd",		ISA_SPEC_CLASS_DRAFT,		0, 9, 0 },
   {"zvbb",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"zvbc",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"zvfbdota32f",	ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
@@ -1597,10 +1676,14 @@ static const struct riscv_supported_ext riscv_supported_std_s_ext[] =
   {"smcntrpmf",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smctr",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smepmp",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"smpmpdeleg",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smpmpmt",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smrnmi",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smstateen",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smdbltrp",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"ss",		ISA_SPEC_CLASS_DRAFT,		1, 11, 0 },
+  {"ss",		ISA_SPEC_CLASS_DRAFT,		1, 12, 0 },
+  {"ss",		ISA_SPEC_CLASS_DRAFT,		1, 13, 0 },
   {"ssaia",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ssccfg",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ssccptr",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
@@ -1624,6 +1707,8 @@ static const struct riscv_supported_ext riscv_supported_std_s_ext[] =
   {"svrsw60t59b",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"svvptc",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ssqosid",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"sspmp",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"sspmpen",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ssnpm",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smnpm",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"smmpm",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
@@ -1639,6 +1724,12 @@ static const struct riscv_supported_ext riscv_supported_std_zxm_ext[] =
 
 static const struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
 {
+  {"xandesbfhcvt",	ISA_SPEC_CLASS_DRAFT,	5, 0, 0 },
+  {"xandesvbfhcvt",	ISA_SPEC_CLASS_DRAFT,	5, 0, 0 },
+  {"xandesvsintload",	ISA_SPEC_CLASS_DRAFT,	5, 0, 0 },
+  {"xandesvpackfph",	ISA_SPEC_CLASS_DRAFT,	5, 0, 0 },
+  {"xandesvdot",	ISA_SPEC_CLASS_DRAFT,	5, 0, 0 },
+  {"xandesvsinth",	ISA_SPEC_CLASS_DRAFT,	5, 0, 0 },
   {"xcvalu",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xcvbi",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xcvbitmanip",	ISA_SPEC_CLASS_DRAFT,   1, 0, 0 },
@@ -1661,6 +1752,8 @@ static const struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {"xtheadvector",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadvdot",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadzvamo",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
+  {"xxtvarith",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
+  {"xxtvcoder",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xventanacondops",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xsfvcp",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xsfcease",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
@@ -1773,7 +1866,7 @@ riscv_recognized_prefixed_ext (const char *ext)
 }
 
 /* Canonical order for single letter extensions.  */
-static const char riscv_ext_canonical_order[] = "eigmafdqlcbkjtpvnh";
+static const char riscv_ext_canonical_order[] = "eigmafdqlcbkjtvph";
 
 /* Array is used to compare the orders of standard extensions quickly.  */
 static int riscv_ext_order[26] = {0};
@@ -2988,6 +3081,9 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return (riscv_subset_supports (rps, "v")
 	      || riscv_subset_supports (rps, "zve64x")
 	      || riscv_subset_supports (rps, "zve32x"));
+    case INSN_CLASS_ZVE64X:
+      return (riscv_subset_supports (rps, "v")
+	      || riscv_subset_supports (rps, "zve64x"));
     case INSN_CLASS_ZVEF:
       return (riscv_subset_supports (rps, "v")
 	      || riscv_subset_supports (rps, "zve64d")
@@ -3070,6 +3166,18 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "svinval");
     case INSN_CLASS_H:
       return riscv_subset_supports (rps, "h");
+    case INSN_CLASS_XANDESBFHCVT:
+      return riscv_subset_supports (rps, "xandesbfhcvt");
+    case INSN_CLASS_XANDESVBFHCVT:
+      return riscv_subset_supports (rps, "xandesvbfhcvt");
+    case INSN_CLASS_XANDESVSINTLOAD:
+      return riscv_subset_supports (rps, "xandesvsintload");
+    case INSN_CLASS_XANDESVPACKFPH:
+      return riscv_subset_supports (rps, "xandesvpackfph");
+    case INSN_CLASS_XANDESVDOT:
+      return riscv_subset_supports (rps, "xandesvdot");
+    case INSN_CLASS_XANDESVSINTH:
+      return riscv_subset_supports (rps, "xandesvsinth");
     case INSN_CLASS_XCVALU:
       return riscv_subset_supports (rps, "xcvalu");
     case INSN_CLASS_XCVBI:
@@ -3112,6 +3220,10 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "xtheadvector");
     case INSN_CLASS_XTHEADVDOT:
       return riscv_subset_supports (rps, "xtheadvdot");
+    case INSN_CLASS_XXTVARITH:
+      return riscv_subset_supports (rps, "xxtvarith");
+    case INSN_CLASS_XXTVCODER:
+      return riscv_subset_supports (rps, "xxtvcoder");
     case INSN_CLASS_XTHEADZVAMO:
       return riscv_subset_supports (rps, "xtheadzvamo");
     case INSN_CLASS_XVENTANACONDOPS:
@@ -3342,6 +3454,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zksh";
     case INSN_CLASS_V:
       return _("v' or `zve64x' or `zve32x");
+    case INSN_CLASS_ZVE64X:
+      return _("v' or `zve64x");
     case INSN_CLASS_ZVEF:
       return _("v' or `zve64d' or `zve64f' or `zve32f");
     case INSN_CLASS_ZVABD:
@@ -3414,6 +3528,18 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "svinval";
     case INSN_CLASS_H:
       return _("h");
+    case INSN_CLASS_XANDESBFHCVT:
+      return "xandesbfhcvt";
+    case INSN_CLASS_XANDESVBFHCVT:
+      return "xandesvbfhcvt";
+    case INSN_CLASS_XANDESVSINTLOAD:
+      return "xandesvsintload";
+    case INSN_CLASS_XANDESVPACKFPH:
+      return "xandesvpackfph";
+    case INSN_CLASS_XANDESVDOT:
+      return "xandesvdot";
+    case INSN_CLASS_XANDESVSINTH:
+      return "xandesvsinth";
     case INSN_CLASS_XCVALU:
       return "xcvalu";
     case INSN_CLASS_XCVBI:
@@ -3456,6 +3582,10 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "xtheadvector";
     case INSN_CLASS_XTHEADVDOT:
       return "xtheadvdot";
+    case INSN_CLASS_XXTVARITH:
+      return "xxtvarith";
+    case INSN_CLASS_XXTVCODER:
+      return "xxtvcoder";
     case INSN_CLASS_XTHEADZVAMO:
       return "xtheadzvamo";
     case INSN_CLASS_XVENTANACONDOPS:
@@ -3474,6 +3604,14 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "xsmtvdot";
     case INSN_CLASS_XSMTVDOTII:
       return "xsmtvdotii";
+    case INSN_CLASS_XMIPSCBOP:
+      return "xmipscbop";
+    case INSN_CLASS_XMIPSCMOV:
+      return "xmipscmov";
+    case INSN_CLASS_XMIPSEXECTL:
+      return "xmipsexectl";
+    case INSN_CLASS_XMIPSLSP:
+      return "xmipslsp";
     case INSN_CLASS_XSMTVDOT_OR_XSMTVDOTII:
       return _("xsmtvdot' or `xsmtvdotii");
     default:
@@ -3874,6 +4012,34 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info,
 	 initialized.  */
       out_attr[0].i = 1;
 
+      for (i = LEAST_KNOWN_OBJ_ATTRIBUTE; i < NUM_KNOWN_OBJ_ATTRIBUTES; i++)
+	{
+	  switch (i)
+	    {
+	    case Tag_RISCV_unaligned_access:
+	      if (out_attr[i].i <= 1)
+		break;
+
+	      _bfd_error_handler
+		(_("warning: %pB uses non-boolean `unaligned_access' attribute; "
+		   "converting to boolean"),
+		 ibfd);
+	      out_attr[i].i = 1;
+	      break;
+
+	    case Tag_RISCV_stack_align:
+	      if (!(out_attr[i].i & (out_attr[i].i - 1)))
+		break;
+
+	      _bfd_error_handler
+		(_("warning: %pB uses non-power-of-2 `stack_align' attribute; "
+		   "ignoring"),
+		 ibfd);
+	      out_attr[i].i = 0;
+	      break;
+	    }
+	}
+
       return true;
     }
 
@@ -3962,14 +4128,23 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info,
 	break;
 
       case Tag_RISCV_unaligned_access:
-	out_attr[i].i |= in_attr[i].i;
+	if (in_attr[i].i > 1)
+	  _bfd_error_handler
+	    (_("warning: %pB uses non-boolean `unaligned_access' attribute; "
+	       "converting to boolean"),
+	     ibfd);
+	out_attr[i].i |= !!in_attr[i].i;
 	break;
 
       case Tag_RISCV_stack_align:
-	if (out_attr[i].i == 0)
+	if ((in_attr[i].i & (in_attr[i].i - 1)) != 0)
+	  _bfd_error_handler
+	    (_("warning: %pB uses non-power-of-2 `stack_align' attribute; "
+	       "ignoring"),
+	     ibfd);
+	else if (out_attr[i].i == 0)
 	  out_attr[i].i = in_attr[i].i;
 	else if (in_attr[i].i != 0
-		 && out_attr[i].i != 0
 		 && out_attr[i].i != in_attr[i].i)
 	  {
 	    _bfd_error_handler

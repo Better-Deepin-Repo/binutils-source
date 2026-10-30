@@ -81,6 +81,7 @@ SECTION
 #define NOTE_PSEUDO_SECTION_LOONGARCH_LASX	".reg-loongarch-lasx"
 #define NOTE_PSEUDO_SECTION_LOONGARCH_LBT	".reg-loongarch-lbt"
 #define NOTE_PSEUDO_SECTION_LOONGARCH_LSX	".reg-loongarch-lsx"
+#define NOTE_PSEUDO_SECTION_PPC_DMR		".reg-ppc-dmr"
 #define NOTE_PSEUDO_SECTION_PPC_DSCR		".reg-ppc-dscr"
 #define NOTE_PSEUDO_SECTION_PPC_EBB		".reg-ppc-ebb"
 #define NOTE_PSEUDO_SECTION_PPC_PMU		".reg-ppc-pmu"
@@ -5885,7 +5886,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
   struct elf_segment_map *phdr_load_seg;
   Elf_Internal_Phdr *phdrs;
   Elf_Internal_Phdr *p;
-  file_ptr off;  /* Octets.  */
+  ufile_ptr off;  /* Octets.  */
   bfd_size_type maxpagesize;
   unsigned int alloc, actual;
   unsigned int i, j;
@@ -6175,9 +6176,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    {
 	      if (m->count > 0)
 		{
-		  if (p->p_vaddr < (bfd_vma) off
+		  if (p->p_vaddr < off
 		      || (!m->p_paddr_valid
-			  && p->p_paddr < (bfd_vma) off))
+			  && p->p_paddr < off))
 		    {
 		      _bfd_error_handler
 			(_("%pB: not enough room for program headers,"
@@ -6595,7 +6596,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
   Elf_Internal_Phdr *phdrs;
   Elf_Internal_Phdr *p;
   struct elf_segment_map *m;
-  file_ptr off;
+  ufile_ptr off;
   unsigned int opb = bfd_octets_per_byte (abfd, NULL);
   bfd_vma maxpagesize;
 
@@ -6864,7 +6865,7 @@ assign_file_positions_except_relocs (bfd *abfd,
       unsigned int num_sec = elf_numsections (abfd);
       Elf_Internal_Shdr **hdrpp;
       unsigned int i;
-      file_ptr off;
+      ufile_ptr off;
 
       /* Start after the ELF header.  */
       off = i_ehdrp->e_ehsize;
@@ -7110,7 +7111,7 @@ _bfd_elf_modify_headers (bfd *obfd, struct bfd_link_info *link_info)
 static bool
 _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
 {
-  file_ptr off;
+  ufile_ptr off;
   Elf_Internal_Shdr **shdrpp, **end_shdrpp;
   Elf_Internal_Shdr *shdrp;
   Elf_Internal_Ehdr *i_ehdrp;
@@ -10568,6 +10569,12 @@ elfcore_grok_ppc_tm_cdscr (bfd *abfd, Elf_Internal_Note *note)
 }
 
 static bool
+elfcore_grok_ppc_dmr (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, NOTE_PSEUDO_SECTION_PPC_DMR, note);
+}
+
+static bool
 elfcore_grok_s390_high_gprs (bfd *abfd, Elf_Internal_Note *note)
 {
   return elfcore_make_note_pseudosection (abfd, NOTE_PSEUDO_SECTION_S390_HIGH_GPRS, note);
@@ -11185,6 +11192,7 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
 	case NT_LARCH_LASX:	return elfcore_grok_loongarch_lasx (abfd, note);
 	case NT_LARCH_LBT:	return elfcore_grok_loongarch_lbt (abfd, note);
 	case NT_LARCH_LSX:	return elfcore_grok_loongarch_lsx (abfd, note);
+	case NT_PPC_DMR:	return elfcore_grok_ppc_dmr (abfd, note);
 	case NT_PPC_DSCR:	return elfcore_grok_ppc_dscr (abfd, note);
 	case NT_PPC_EBB:	return elfcore_grok_ppc_ebb (abfd, note);
 	case NT_PPC_PMU:	return elfcore_grok_ppc_pmu (abfd, note);
@@ -12602,6 +12610,17 @@ elfcore_write_ppc_tm_cdscr (bfd *abfd,
 			     ppc_tm_cdscr, size);
 }
 
+char *
+elfcore_write_ppc_dmr (bfd *abfd,
+		       char *buf,
+		       int *bufsiz,
+		       const void *ppc_dmr,
+		       int size)
+{
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     NOTE_NAME_LINUX, NT_PPC_DMR, ppc_dmr, size);
+}
+
 static char *
 elfcore_write_s390_high_gprs (bfd *abfd,
 			      char *buf,
@@ -13046,6 +13065,7 @@ elfcore_write_register_note (bfd *abfd,
       { NOTE_PSEUDO_SECTION_LOONGARCH_LASX,   elfcore_write_loongarch_lasx},
       { NOTE_PSEUDO_SECTION_LOONGARCH_LBT,    elfcore_write_loongarch_lbt},
       { NOTE_PSEUDO_SECTION_LOONGARCH_LSX,    elfcore_write_loongarch_lsx},
+      { NOTE_PSEUDO_SECTION_PPC_DMR,          elfcore_write_ppc_dmr},
       { NOTE_PSEUDO_SECTION_PPC_DSCR,         elfcore_write_ppc_dscr},
       { NOTE_PSEUDO_SECTION_PPC_EBB,          elfcore_write_ppc_ebb},
       { NOTE_PSEUDO_SECTION_PPC_PMU,          elfcore_write_ppc_pmu},

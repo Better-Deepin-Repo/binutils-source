@@ -18,3 +18,14 @@
 	f = g + 1
 	g = f - 1
 	mov eax, [f]
+
+	h=i
+	j=h
+	i=j+h
+	.int i
+
+	k=k+esi
+	mov [k],al
+
+	l=l+edx
+	mov [2*l+edx],al

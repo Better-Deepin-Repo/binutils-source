@@ -3947,11 +3947,14 @@ s_struct (int ignore ATTRIBUTE_UNUSED)
   if (flag_mri)
     stop = mri_comment_field (&stopc);
   abs_section_offset = get_absolute_expression ();
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  /* The ELF backend needs to know that we are changing sections, so
+  /* The ELF and COFF backends need to know that we are changing sections, so
      that .previous works correctly. */
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   if (IS_ELF)
     obj_elf_section_change_hook ();
+#endif
+#if defined (OBJ_COFF)
+  obj_coff_section_change_hook ();
 #endif
   subseg_set (absolute_section, 0);
   demand_empty_rest_of_line ();
@@ -6221,14 +6224,12 @@ next_char_of_string (void)
 	case '5':
 	case '6':
 	case '7':
-	case '8':
-	case '9':
 	  {
 	    unsigned number;
 	    int i;
 
 	    for (i = 0, number = 0;
-		 ISDIGIT (c) && i < 3;
+		 i < 3 && c >= '0' && c <= '7';
 		 c = *input_line_pointer++, i++)
 	      {
 		number = number * 8 + c - '0';
